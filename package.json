@@ -12,7 +12,8 @@
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --project tsconfig.pages.json --noEmit",
+    "typecheck:sites": "tsc --noEmit",
     "build:pages": "node tools/build-pages.mjs",
     "test:cloud": "node tests/cloud-transport.mjs"
   },
