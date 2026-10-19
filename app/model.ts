@@ -1,0 +1,11 @@
+import { z } from "zod";
+export const statuses = { tbr:"Chci číst",reading:"Právě čtu",read:"Přečteno",paused:"Odloženo" } as const;
+export const noteSchema = z.object({id:z.string().max(100),type:z.enum(["note","quote"]),title:z.string().max(200),content:z.string().min(1).max(30000),page:z.number().int().min(0).max(100000),spoiler:z.boolean(),createdAt:z.string().max(40)});
+export const characterSchema = z.object({id:z.string().max(100),name:z.string().min(1).max(200),role:z.string().max(200),description:z.string().max(10000)});
+export const bookSchema = z.object({title:z.string().trim().min(1,"Vyplň název knihy.").max(300),author:z.string().max(300),cover:z.string().max(2000).refine(s=>!s||/^https:\/\//i.test(s),"Obálka musí mít HTTPS adresu."),isbn:z.string().max(40),pages:z.number().int().min(0).max(100000),currentPage:z.number().int().min(0).max(100000),status:z.enum(["tbr","reading","read","paused"]),rating:z.number().min(0).max(5),priority:z.enum(["high","normal","low"]),wantToBuy:z.boolean().default(false),tags:z.array(z.string().max(60)).max(30),series:z.string().max(200),description:z.string().max(30000),notes:z.array(noteSchema).max(2000),characters:z.array(characterSchema).max(500),addedAt:z.string().max(40),startedAt:z.string().max(40),finishedAt:z.string().max(40)}).refine(b=>!b.pages||b.currentPage<=b.pages,{message:"Přečtené stránky nemohou přesáhnout počet stran.",path:["currentPage"]});
+export type BookData=z.infer<typeof bookSchema>;
+export type Book=BookData & {id:string;revision:number};
+export type Note=z.infer<typeof noteSchema>;
+export const blankBook=():BookData=>({title:"",author:"",cover:"",isbn:"",pages:0,currentPage:0,status:"tbr",rating:0,priority:"normal",wantToBuy:false,tags:[],series:"",description:"",notes:[],characters:[],addedAt:new Date().toISOString(),startedAt:"",finishedAt:""});
+export const dateCZ=(s:string)=>s?new Date(s).toLocaleDateString("cs-CZ"):"—";
+export const priorityLabel={high:"Co nejdřív",normal:"Až přijde čas",low:"Jednou"};

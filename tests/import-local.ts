@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {localApi,enableLocal} from '../app/local';
+import {blankBook} from '../app/model';
+const memory=new Map();
+(globalThis as any).localStorage={getItem:(k:string)=>memory.get(k)??null,setItem:(k:string,v:string)=>memory.set(k,v)};
+(globalThis as any).window={location:new URL('http://127.0.0.1/test')};enableLocal();
+const id=crypto.randomUUID(),backup={format:'draci-archiv-v1',books:[{...blankBook(),id,title:'Přenos do nové verze',wantToBuy:true}]};
+assert.equal((await localApi('/api/import','POST',backup)).added,1);
+let book=(await localApi('/api/books','GET'))[0];assert.equal(book.wantToBuy,true);
+book=await localApi('/api/books','PUT',{...book,rating:5});
+assert.equal((await localApi('/api/import','POST',backup)).skipped,1);
+assert.equal((await localApi('/api/books','GET'))[0].rating,5);
+await assert.rejects(()=>localApi('/api/books?id='+id+'&revision=0','DELETE'));
+await localApi('/api/books?id='+id+'&revision='+book.revision,'DELETE');
+assert.deepEqual(await localApi('/api/books','GET'),[]);
+console.log('PASS local backup migration, repeat import, shopping list and revision-safe deletion');
