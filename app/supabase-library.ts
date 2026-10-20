@@ -5,6 +5,7 @@ import { parseBackup, MAX_BACKUP_BYTES } from "./backup";
 import { LibraryApiError, type LibraryTransport } from "./client-api";
 import { localApi } from "./local";
 import {defaultPreferences,preferencesSchema} from "./preferences";
+import {releaseReadSchema,releaseAcknowledgementSchema} from "./releases";
 
 const rowSchema=z.object({id:z.string().uuid(),revision:z.number().int().nonnegative(),data:bookSchema});
 function decode(row:unknown):Book{
@@ -20,6 +21,17 @@ function fail(error:{code?:string;message?:string}):never{
 export function supabaseLibrary(client:SupabaseClient,userId:string):LibraryTransport{
  return async(path,method,body:any)=>{
   const url=new URL(path,"https://archive.invalid");
+  if(url.pathname==="/api/releases"){
+   if(method==="GET"){
+    const {data,error}=await client.from("archive_release_reads").select("last_seen_release").eq("user_id",userId).maybeSingle();
+    if(error)fail(error);return releaseReadSchema.parse({lastSeenRelease:data?.last_seen_release??0});
+   }
+   if(method!=="PUT")throw new LibraryApiError("Neznámá operace.",400);
+   const parsed=releaseAcknowledgementSchema.safeParse(body);
+   if(!parsed.success)throw new LibraryApiError("Neplatné potvrzení novinek.",400);
+   const {data,error}=await client.from("archive_release_reads").upsert({user_id:userId,last_seen_release:parsed.data.throughRelease},{onConflict:"user_id"}).select("last_seen_release").single();
+   if(error)fail(error);return releaseReadSchema.parse({lastSeenRelease:data.last_seen_release});
+  }
   if(url.pathname==="/api/preferences"){
    const decodePreference=(row:any)=>preferencesSchema.parse({themeId:row.theme_id,showSticker:row.show_sticker,revision:row.revision});
    if(method==="GET"){

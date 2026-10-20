@@ -15,11 +15,12 @@ if(!key.startsWith('sb_publishable_'))throw new Error('Use a publishable key for
 if(!googleBooksKey)throw new Error('Missing Google Books browser API key');
 await fs.mkdir(path.join(output,'assets'),{recursive:true});
 await fs.mkdir(path.join(output,'images'),{recursive:true});
+await fs.copyFile(path.join(root,'app/releases.json'),path.join(output,'releases.json'));
 const bundle=await build({entryPoints:[path.join(root,'tools/cloud-entry.tsx')],bundle:true,format:'esm',minify:true,target:'es2020',write:false,define:{__SUPABASE_URL__:JSON.stringify(url),__SUPABASE_KEY__:JSON.stringify(key),__GOOGLE_BOOKS_KEY__:JSON.stringify(googleBooksKey),__BASE_PATH__:JSON.stringify(base),'process.env.NODE_ENV':'"production"'}});
 const {createHash}=await import('node:crypto');
 const js=bundle.outputFiles[0].text,jsName='app-'+createHash('sha256').update(js).digest('hex').slice(0,12)+'.js';
 await fs.writeFile(path.join(output,'assets',jsName),js);
-const css=(await Promise.all(['archive.css','cloud.css','theme-palette.css','themes.css','catalog.css'].map(name=>fs.readFile(path.join(root,'app',name),'utf8')))).join('\n').replaceAll('/images/',base+'images/');
+const css=(await Promise.all(['archive.css','cloud.css','theme-palette.css','themes.css','catalog.css','releases.css'].map(name=>fs.readFile(path.join(root,'app',name),'utf8')))).join('\n').replaceAll('/images/',base+'images/');
 const cssName='app-'+createHash('sha256').update(css).digest('hex').slice(0,12)+'.css';
 await fs.writeFile(path.join(output,'assets',cssName),css);
 for(const name of ['dragon-library.webp','reading-sticker.webp',...themeImageFiles])await fs.copyFile(path.join(root,'public/images',name),path.join(output,'images',name));

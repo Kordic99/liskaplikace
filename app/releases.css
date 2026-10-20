@@ -1,0 +1,13 @@
+.release-intro{display:flex;align-items:center;gap:14px;margin:0 0 22px;padding:15px;background:var(--panel,#251a23);border:1px solid var(--line);border-radius:7px}
+.release-emblem{display:grid;place-items:center;flex-shrink:0;width:45px;height:45px;border-radius:50%;background:var(--gold-dim,#9c725322);color:var(--gold)}
+.release-intro strong{font-size:13px;color:var(--gold);font-weight:500}
+.release-intro p{font-size:11px;line-height:1.6;margin-top:4px;color:var(--muted)}
+.release-list{display:grid;gap:23px;max-height:clamp(140px,calc(100dvh - 390px),460px);overflow-y:auto;padding-right:10px;overscroll-behavior:contain}
+.release-entry+.release-entry{padding-top:23px;border-top:1px solid var(--line)}
+.release-entry time{font-size:10px;letter-spacing:.5px;color:var(--muted)}
+.release-entry h3{font:600 27px/1.2 var(--serif);color:var(--text);margin:7px 0 12px}
+.release-entry ul{padding-left:19px;display:grid;gap:10px;margin:0}
+.release-entry li{font-size:12px;line-height:1.75;color:var(--muted);padding-left:4px}
+.release-entry li::marker{color:var(--gold)}
+.release-history-button{margin-top:12px}
+@media(max-width:500px){.release-intro{padding:12px;gap:10px}.release-intro strong{font-size:12px}.release-entry h3{font-size:25px}.release-entry li{font-size:13px;line-height:1.7}.release-actions{flex-wrap:wrap}.release-actions .button{width:100%;font-size:12px}}

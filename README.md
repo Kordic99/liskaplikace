@@ -30,6 +30,14 @@ Přečtené knihy lze filtrovat podle roku a měsíce dočtení, společně s hl
 
 V Nastavení jsou motivy Dračí knihovna, Liščí podzim, Lesní útočiště a Měsíční noc. Karty motivů zobrazují náhled skutečné ilustrace; každý ze čtyř motivů má vlastní hlavní obrázek. Motiv a zobrazení samolepky se ukládají k účtu a načítají na dalších zařízeních. Revize chrání i nastavení před přepsáním starším zařízením.
 
+## Novinky po přihlášení
+
+Při otevření přihlášené knihovny se načte aktuální veřejný seznam vydání `releases.json` a soukromý stav účtu z `archive_release_reads`. Uživatel dostane v jednom okně všechny aktualizace, které ještě nepotvrdil, včetně součtu novinek. Účty mají nezávislé hranice přečtených vydání; potvrzení je společné pro PC a telefon. Přihlášení ani samotné otevření okna změny neoznačí jako přečtené. Potvrzení se uloží teprve zavřením okna; při chybě lze opakovat pokus nebo zvolit připomenutí příště.
+
+Otevřené okno zachovává svůj seznam změn: aktualizace vydaná během čtení se neoznačí za přečtenou omylem. Monotónní databázový zápis zabrání staršímu zařízení vrátit potvrzení zpět. Okno počká na dokončení jiného otevřeného editoru. Při návratu do aplikace se stav znovu ověří; obnovení přihlašovacího tokenu samo okno znovu neotevírá. Novější veřejný seznam pozná i starší otevřená verze; po potvrzení nabídne načtení nové aplikace. Historie je dostupná v Nastavení.
+
+Při prvním použití této funkce účet dostane úvodní přehled posledních zaznamenaných změn; dřívější návštěvy se zpětně neodhadují. Každá další změna zdroje musí přidat pravdivou položku do `app/releases.json` s dalším číselným ID. Publikované položky se nemění. CI porovnává seznam s posledním úspěšně nasazeným vydáním a při chybějících novinkách nasazení zastaví; opakované nasazení stejného sestavení nové oznámení nevytváří. Viz `AGENTS.md`.
+
 ## Přenos původní knihovny
 
 1. V původním místním HTML zvol Zálohovat knihovnu.
@@ -40,7 +48,7 @@ Na iPhonu otevři online adresu v Safari → Sdílet → Přidat na plochu → O
 
 ## Nasazení
 
-1. V samostatném projektu Supabase aplikuj `supabase/schema.sql` a potom `supabase/preferences.sql`. Aktualizace existujícího projektu používá `supabase/preferences.sql` a `supabase/merge-tbr.sql` (nezaváděj znovu tabulku knih). Schéma je již aplikované v připraveném projektu Liškaplikace.
+1. V samostatném projektu Supabase aplikuj `supabase/schema.sql`, `supabase/preferences.sql` a `supabase/release-notices.sql`. Aktualizace existujícího projektu používá pouze chybějící dílčí skripty `supabase/preferences.sql`, `supabase/merge-tbr.sql` a `supabase/release-notices.sql` (nezaváděj znovu tabulku knih). Schéma je již aplikované v připraveném projektu Liškaplikace.
 2. V Authentication → URL Configuration nastav Site URL na cílovou adresu aplikace.
 3. V GitHub Actions Variables nastav VITE_SUPABASE_URL a VITE_SUPABASE_PUBLISHABLE_KEY (moderní sb_publishable_ klíč, nikdy service_role, sb_secret_ ani heslo databáze) a VITE_GOOGLE_BOOKS_API_KEY podle části Vyhledávání knih.
 4. Settings → Pages → Source: GitHub Actions. Workflow Publish Liškaplikace kontroluje typy, testy a sestavení, poté nasadí dist-pages.
@@ -48,7 +56,7 @@ Na iPhonu otevři online adresu v Safari → Sdílet → Přidat na plochu → O
 
 ## Vývoj a ověření
 
-Node.js 24 a npm. Instalace: npm ci. Kontroly: npm run typecheck, npm run test:cloud, npm run test:catalog. Po úpravě pevných barev v archive.css/cloud.css spusť `node tools/sync-theme-palette.mjs` pro obnovu barev motivů. Sestavení: nastav veřejné proměnné Supabase a Google Books a spusť npm run build:pages. PAGES_BASE_PATH má výchozí hodnotu /liskaplikace/.
+Node.js 24 a npm. Instalace: npm ci. Kontroly: npm run typecheck, npm run test:cloud, npm run test:catalog, npm run test:releases a `node tools/check-releases.mjs`. Po úpravě pevných barev v archive.css/cloud.css spusť `node tools/sync-theme-palette.mjs` pro obnovu barev motivů. Sestavení: nastav veřejné proměnné Supabase a Google Books a spusť npm run build:pages. PAGES_BASE_PATH má výchozí hodnotu /liskaplikace/.
 
 Testy ověřují data každého účtu dvou klientů, ochranu před zastaralým uložením a smazáním, opakovatelný import i odkazy a obrázky v podadresáři GitHub Pages. Přímo v databázi byly transakčně ověřeny politiky vlastníka, zákaz přístupu jinému účtu, revize a prázdný výchozí stav. Testovací záznamy byly vráceny zpět transakcí. Test `tests/rls-isolation.sql` lze spustit v migrované databázi; vytvořené zkušební účty a data se vrátí zpět pomocí ROLLBACK. Kontrola security advisors nehlásí nedostatky RLS. Projekt má upozornění na vypnutou kontrolu uniklých hesel (nastavení služby Auth).
 

@@ -39,7 +39,7 @@ function SignedLibrary({client,session}:{client:SupabaseClient;session:Session})
  const [ready,setReady]=useState(false),[signingOut,setSigningOut]=useState(false),[error,setError]=useState("");
  useEffect(()=>{
   configureLibraryTransport(supabaseLibrary(client,session.user.id));setReady(true);
-  const channel=client.channel(`archive:${session.user.id}`).on("postgres_changes",{event:"*",schema:"public",table:"archive_books",filter:`user_id=eq.${session.user.id}`},()=>window.dispatchEvent(new Event("archive:changed"))).on("postgres_changes",{event:"*",schema:"public",table:"archive_preferences",filter:`user_id=eq.${session.user.id}`},()=>window.dispatchEvent(new Event("liskaplikace:preferences-changed"))).subscribe();
+  const channel=client.channel(`archive:${session.user.id}`).on("postgres_changes",{event:"*",schema:"public",table:"archive_books",filter:`user_id=eq.${session.user.id}`},()=>window.dispatchEvent(new Event("archive:changed"))).on("postgres_changes",{event:"*",schema:"public",table:"archive_preferences",filter:`user_id=eq.${session.user.id}`},()=>window.dispatchEvent(new Event("liskaplikace:preferences-changed"))).on("postgres_changes",{event:"*",schema:"public",table:"archive_release_reads",filter:`user_id=eq.${session.user.id}`},()=>window.dispatchEvent(new Event("liskaplikace:releases-changed"))).subscribe();
   return()=>{configureLibraryTransport(undefined);void client.removeChannel(channel)};
  },[client,session.user.id]);
  const signOut=async()=>{setSigningOut(true);setError("");try{const {error}=await client.auth.signOut({scope:"local"});if(error)throw error}catch{setError("Odhlášení se nepodařilo. Zkontroluj připojení a zkus to znovu.")}finally{setSigningOut(false)}};

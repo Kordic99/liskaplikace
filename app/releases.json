@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "date": "2026-10-20",
+    "title": "Bohatší vyhledávání knih",
+    "changes": [
+      "Jedním hledáním prohledáš Google Books i Open Library, s předností českých vydání.",
+      "Ke knize se předvyplní dostupná anotace i údaje konkrétního vydání. Shodná ISBN se neopakují.",
+      "Při výpadku jednoho katalogu můžeš dál hledat ve druhém."
+    ]
+  },
+  {
+    "id": 2,
+    "date": "2026-10-20",
+    "title": "Novinky, které ti neuniknou",
+    "changes": [
+      "Po přihlášení uvidíš přehled změn, které jsi ještě nepotvrdil/a.",
+      "Když vynecháš více aktualizací, jejich novinky najdeš společně v jednom okně.",
+      "Potvrzení se ukládá k tvému účtu a platí na počítači i telefonu. V Nastavení se můžeš k historii kdykoli vrátit."
+    ]
+  }
+]
