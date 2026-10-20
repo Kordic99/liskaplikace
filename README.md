@@ -18,7 +18,7 @@ Každá kniha patří právě do jedné poličky: Přečtené, Právě čtu nebo
 
 Přečtené knihy lze filtrovat podle roku a měsíce dočtení, společně s hledáním názvu, autora a štítků. Datum lze opravit v úpravě knihy; volba Bez data najde knihy, které ho zatím nemají.
 
-V Nastavení jsou motivy Dračí knihovna, Liščí podzim, Lesní útočiště a Měsíční noc. Motiv a zobrazení samolepky se ukládají k účtu a načítají na dalších zařízeních. Revize chrání i nastavení před přepsáním starším zařízením.
+V Nastavení jsou motivy Dračí knihovna, Liščí podzim, Lesní útočiště a Měsíční noc. Karty motivů zobrazují náhled skutečné ilustrace; každý ze čtyř motivů má vlastní hlavní obrázek. Motiv a zobrazení samolepky se ukládají k účtu a načítají na dalších zařízeních. Revize chrání i nastavení před přepsáním starším zařízením.
 
 ## Přenos původní knihovny
 
@@ -48,4 +48,4 @@ tools/build-local.mjs vytváří původní samostatné HTML s ukládáním pouze
 
 ## Obrázky
 
-Online web používá dragon-library.webp, reading-sticker.webp, vlastní vektorovou ilustraci fox-library.svg a liščí ikony aplikace. Původní referenční fotografie a velké PNG soubory zůstávají mimo repozitář.
+Online web používá dragon-library.webp, reading-sticker.webp, samostatné ilustrace Malého prince, živé podzimní lišky a lesní čítárny a liščí ikony aplikace. Původní referenční fotografie a velké PNG soubory zůstávají mimo repozitář.

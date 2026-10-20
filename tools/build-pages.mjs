@@ -1,4 +1,5 @@
 import {build} from 'esbuild';
+import {themeImageFiles} from './theme-assets.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -19,7 +20,7 @@ await fs.writeFile(path.join(output,'assets',jsName),js);
 const css=(await Promise.all(['archive.css','cloud.css','theme-palette.css','themes.css'].map(name=>fs.readFile(path.join(root,'app',name),'utf8')))).join('\n').replaceAll('/images/',base+'images/');
 const cssName='app-'+createHash('sha256').update(css).digest('hex').slice(0,12)+'.css';
 await fs.writeFile(path.join(output,'assets',cssName),css);
-for(const name of ['dragon-library.webp','reading-sticker.webp','fox-library.svg'])await fs.copyFile(path.join(root,'public/images',name),path.join(output,'images',name));
+for(const name of ['dragon-library.webp','reading-sticker.webp',...themeImageFiles])await fs.copyFile(path.join(root,'public/images',name),path.join(output,'images',name));
 for(const name of ['apple-touch-icon.png','app-icon-192.png','app-icon-512.png','favicon.svg'])await fs.copyFile(path.join(root,'public',name),path.join(output,name));
 const manifest=JSON.parse(await fs.readFile(path.join(root,'public/manifest.webmanifest'),'utf8'));
 manifest.id=base;manifest.start_url=base;manifest.scope=base;manifest.icons=manifest.icons.map(icon=>({...icon,src:base+icon.src.replace(/^\//,'')}));
