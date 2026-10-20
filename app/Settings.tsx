@@ -1,0 +1,13 @@
+import {Check,Cloud,LockKeyhole,Palette,RefreshCw} from "lucide-react";
+import {themes} from "./preferences";
+import type {usePreferences} from "./use-preferences";
+
+export default function Settings({preferences,email}:{preferences:ReturnType<typeof usePreferences>;email?:string}) {
+ const {value,loading,saving,error,save,refresh}=preferences;
+ return <><div className="page-intro"><div><div className="eyebrow">TVŮJ ÚČET, TVŮJ SVĚT</div><h1>Nastavení<span className="gold">.</span></h1><p>Udělej si mezi příběhy pohodlí.</p></div></div>
+ <section className="settings-section"><div className="section-title"><div><h2><Palette size={20}/> Motiv knihovny</h2><p>{email?"Motiv se ukládá k tvému účtu a přenáší se i do telefonu.":"V tomto náhledu se motiv ukládá v prohlížeči."}</p></div><span className="settings-status" role="status">{loading?"Načítám…":saving?"Ukládám…":error?"Uložení vyžaduje pozornost":email?"Uloženo k účtu":"Uloženo v prohlížeči"}</span></div>
+ <div className="theme-grid" role="group" aria-label="Motiv knihovny">{themes.map(theme=><button className={`theme-card ${value.themeId===theme.id?"selected":""}`} key={theme.id} aria-pressed={value.themeId===theme.id} disabled={loading||saving} onClick={()=>void save({themeId:theme.id})}><span className={`theme-preview preview-${theme.id}`} style={{background:theme.colors[0]}}><span className="theme-moon" style={{background:theme.colors[2]}}/><span className="theme-preview-books">{theme.colors.map((color,i)=><i key={i} style={{background:color,borderColor:theme.colors[2]}}/>)}</span><span className="theme-swatch">{theme.colors.map(color=><i key={color} style={{background:color}}/>)}</span>{value.themeId===theme.id&&<span className="theme-check"><Check size={15}/></span>}</span><strong>{theme.name}</strong><span>{theme.description}</span></button>)}</div>
+ <label className="setting-toggle"><span><strong>Čtenářská samolepka</strong><small>Zobrazit samolepku nahoře na přehledu.</small></span><input type="checkbox" checked={value.showSticker} disabled={loading||saving} onChange={e=>void save({showSticker:e.target.checked})}/></label>
+ {error&&<div className="settings-error" role="alert"><p>{error}</p><button className="text-button" onClick={()=>void refresh()}><RefreshCw size={14}/> Zkusit načíst znovu</button></div>}</section>
+ <section className="settings-section account-settings"><h2><LockKeyhole size={20}/> Soukromí knihovny</h2>{email?<><p className="account-email">{email}</p><p>Knihy, zápisky, postavy, nákupní list i motiv patří tomuto účtu. Každý další čtenář má vlastní oddělenou knihovnu.</p><p><Cloud size={15}/> Na PC i iPhonu se přihlas stejným účtem.</p></>:<p>Toto je místní náhled. Pro sdílení mezi zařízeními použij online aplikaci.</p>}</section></>;
+}

@@ -28,6 +28,9 @@ create policy "delete own books" on public.archive_books for delete to authentic
 create function public.archive_guard_revision() returns trigger
 language plpgsql security invoker set search_path = '' as $$
 begin
+  if NEW.data->>'status' = 'paused' then
+    NEW.data := jsonb_set(NEW.data, '{status}', '"tbr"'::jsonb);
+  end if;
   if TG_OP = 'INSERT' then
     if NEW.revision <> 0 then raise exception 'New books start at revision zero' using errcode='23514'; end if;
   else

@@ -1,4 +1,4 @@
-name: Publish Dračí archiv
+name: Publish Liškaplikace
 on:
   push:
     branches: [main]

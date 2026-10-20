@@ -1,5 +1,6 @@
 import { bookSchema, type Book } from "./model";
 import {parseBackup,mergeBackup,MAX_BACKUP_BYTES} from "./backup";
+import {defaultPreferences,preferencesSchema} from "./preferences";
 let standalone=false;
 let staticBase:string|undefined;
 export const enableStaticRouting=(base:string)=>{staticBase=base};
@@ -17,11 +18,19 @@ const key="draci-archiv-local-v1";
 function read():Book[]{
  let raw;try{raw=localStorage.getItem(key)}catch{throw new Error("Prohlížeč nepovolil místní ukládání. Otevři soubor v běžném okně Edge nebo Chrome.")}
  if(!raw)return [];
- try{const data=JSON.parse(raw);if(!Array.isArray(data))throw new Error();return data}catch{throw new Error("Místní knihovnu nelze přečíst. Existující data nebyla přepsána.")}
+ try{const data=JSON.parse(raw);if(!Array.isArray(data))throw new Error();return data.map((book:any)=>book.status==="paused"?{...book,status:"tbr"}:book)}catch{throw new Error("Místní knihovnu nelze přečíst. Existující data nebyla přepsána.")}
 }
 function write(books:Book[]){try{localStorage.setItem(key,JSON.stringify(books))}catch{throw new Error("Knihovnu nelze uložit. Úložiště prohlížeče může být plné nebo zakázané.")}}
 export async function localApi(path:string,method:string,body?:any):Promise<any>{
  const url=new URL(path,"https://local.invalid");
+ if(url.pathname==="/api/preferences"){
+  const key="liskaplikace-preferences-v1",raw=localStorage.getItem(key),current=raw?preferencesSchema.parse(JSON.parse(raw)):defaultPreferences();
+  if(method==="GET")return current;
+  if(method!=="PUT")throw new Error("Neznámá operace.");
+  const next=preferencesSchema.parse(body);
+  if(next.revision!==current.revision)throw new Error("Nastavení se mezitím změnilo v jiném okně. Vyber motiv znovu.");
+  const saved={...next,revision:current.revision+1};localStorage.setItem(key,JSON.stringify(saved));return saved;
+ }
  if(url.pathname==="/api/import"&&method==="POST"){
   if(new TextEncoder().encode(JSON.stringify(body)).byteLength>MAX_BACKUP_BYTES)throw new Error("Záloha může mít nejvýše 5 MB.");
   const result=mergeBackup(read(),parseBackup(body));write(result.books);return {added:result.added,skipped:result.skipped};

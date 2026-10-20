@@ -4,6 +4,7 @@ import { bookSchema, type Book } from "./model";
 import { parseBackup, MAX_BACKUP_BYTES } from "./backup";
 import { LibraryApiError, type LibraryTransport } from "./client-api";
 import { localApi } from "./local";
+import {defaultPreferences,preferencesSchema} from "./preferences";
 
 const rowSchema=z.object({id:z.string().uuid(),revision:z.number().int().nonnegative(),data:bookSchema});
 function decode(row:unknown):Book{
@@ -19,6 +20,22 @@ function fail(error:{code?:string;message?:string}):never{
 export function supabaseLibrary(client:SupabaseClient,userId:string):LibraryTransport{
  return async(path,method,body:any)=>{
   const url=new URL(path,"https://archive.invalid");
+  if(url.pathname==="/api/preferences"){
+   const decodePreference=(row:any)=>preferencesSchema.parse({themeId:row.theme_id,showSticker:row.show_sticker,revision:row.revision});
+   if(method==="GET"){
+    const {data,error}=await client.from("archive_preferences").select("theme_id,show_sticker,revision").eq("user_id",userId).maybeSingle();
+    if(error)fail(error);return data?decodePreference(data):defaultPreferences();
+   }
+   if(method!=="PUT")throw new LibraryApiError("Neznámá operace.",400);
+   const parsed=preferencesSchema.safeParse(body);
+   if(!parsed.success)throw new LibraryApiError("Neplatné nastavení motivu.",400);
+   const {themeId,showSticker,revision}=parsed.data;
+   const table=client.from("archive_preferences");
+   const query=revision===0?table.insert({user_id:userId,theme_id:themeId,show_sticker:showSticker,revision:1}):table.update({theme_id:themeId,show_sticker:showSticker,revision:revision+1}).eq("user_id",userId).eq("revision",revision);
+   const {data,error}=await query.select("theme_id,show_sticker,revision").maybeSingle();
+   if(error?.code==="23505"||!error&&!data)throw new LibraryApiError("Motiv se mezitím změnil na druhém zařízení. Načetli jsme aktuální nastavení; vyber motiv znovu.",409);
+   if(error)fail(error);return decodePreference(data);
+  }
   if(url.pathname==="/api/search")return localApi(path,"GET");
   if(url.pathname==="/api/import"&&method==="POST"){
    if(new TextEncoder().encode(JSON.stringify(body)).byteLength>MAX_BACKUP_BYTES)throw new LibraryApiError("Záloha může mít nejvýše 5 MB.",400);

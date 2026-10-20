@@ -14,12 +14,12 @@ const client=__SUPABASE_URL__&&__SUPABASE_KEY__?createClient(__SUPABASE_URL__,__
 const returnUrl=()=>new URL(__BASE_PATH__,location.origin).href;
 const readableError=(error:{message:string})=>{
  if(/invalid login credentials/i.test(error.message))return "E-mail nebo heslo nesouhlasí.";
- if(/email not confirmed/i.test(error.message))return "Nejdřív potvrď e-mail od Dračího archivu a potom se přihlas.";
+ if(/email not confirmed/i.test(error.message))return "Nejdřív potvrď e-mail od Liškaplikace a potom se přihlas.";
  if(/rate limit|too many|security purposes/i.test(error.message))return "Požadavků je teď příliš mnoho. Chvíli počkej a zkus to znovu.";
  if(/already registered/i.test(error.message))return "Tento účet už existuje. Zkus se přihlásit nebo obnovit heslo.";
  return "Požadavek se nepodařilo dokončit. Zkontroluj připojení a zkus to znovu.";
 };
-function Gate({children}:{children:React.ReactNode}){return <main className="cloud-gate"><section className="cloud-card"><div className="cloud-emblem"><BookOpen size={31}/><span>✧</span></div><div className="eyebrow">TVÁ OSOBNÍ KNIHOVNA</div><h1>Dračí archiv<span className="gold">.</span></h1>{children}</section></main>}
+function Gate({children}:{children:React.ReactNode}){return <main className="cloud-gate"><section className="cloud-card"><div className="cloud-emblem"><BookOpen size={31}/><span>✧</span></div><div className="eyebrow">TVÁ OSOBNÍ KNIHOVNA</div><h1>Liškaplikace<span className="gold">.</span></h1>{children}</section></main>}
 export default function CloudApp(){
  const [session,setSession]=useState<Session|null>(null),[loading,setLoading]=useState(true),[recovery,setRecovery]=useState(false),[error,setError]=useState("");
  useEffect(()=>{
@@ -29,7 +29,7 @@ export default function CloudApp(){
   void client.auth.getSession().then(({data,error})=>{if(active){if(error)setError(readableError(error));setSession(data.session);setLoading(false)}}).catch(()=>{if(active){setError("Přihlášení se nepodařilo načíst. Obnov stránku a zkus to znovu.");setLoading(false)}});
   return()=>{active=false;subscription.unsubscribe()};
  },[]);
- if(!client)return <Gate><p>Online připojení ještě není nastavené. Kontaktuj správce aplikace.</p></Gate>;
+ if(!client)return <Gate><p>Online připojení ještě není nastavené. Zkus aplikaci otevřít později.</p></Gate>;
  if(loading)return <Gate><p className="cloud-loading"><LoaderCircle className="spin" size={18}/> Otevírám bránu do archivu…</p></Gate>;
  if(recovery&&session)return <AuthForm client={client} recovery onRecovered={()=>setRecovery(false)}/>;
  if(!session)return <AuthForm client={client} initialError={error}/>;
@@ -39,11 +39,11 @@ function SignedLibrary({client,session}:{client:SupabaseClient;session:Session})
  const [ready,setReady]=useState(false),[signingOut,setSigningOut]=useState(false),[error,setError]=useState("");
  useEffect(()=>{
   configureLibraryTransport(supabaseLibrary(client,session.user.id));setReady(true);
-  const channel=client.channel(`archive:${session.user.id}`).on("postgres_changes",{event:"*",schema:"public",table:"archive_books",filter:`user_id=eq.${session.user.id}`},()=>window.dispatchEvent(new Event("archive:changed"))).subscribe();
+  const channel=client.channel(`archive:${session.user.id}`).on("postgres_changes",{event:"*",schema:"public",table:"archive_books",filter:`user_id=eq.${session.user.id}`},()=>window.dispatchEvent(new Event("archive:changed"))).on("postgres_changes",{event:"*",schema:"public",table:"archive_preferences",filter:`user_id=eq.${session.user.id}`},()=>window.dispatchEvent(new Event("liskaplikace:preferences-changed"))).subscribe();
   return()=>{configureLibraryTransport(undefined);void client.removeChannel(channel)};
  },[client,session.user.id]);
  const signOut=async()=>{setSigningOut(true);setError("");try{const {error}=await client.auth.signOut({scope:"local"});if(error)throw error}catch{setError("Odhlášení se nepodařilo. Zkontroluj připojení a zkus to znovu.")}finally{setSigningOut(false)}};
- if(!ready)return <Gate><p className="cloud-loading"><LoaderCircle className="spin" size={18}/> Načítám společnou knihovnu…</p></Gate>;
+ if(!ready)return <Gate><p className="cloud-loading"><LoaderCircle className="spin" size={18}/> Načítám tvoji knihovnu…</p></Gate>;
  const bookId=new URLSearchParams(location.search).get("book")??undefined;
  return <><Archive bookId={bookId} account={{email:session.user.email??"Tvůj účet",onSignOut:signOut,busy:signingOut}}/>{error&&<div className="toast" role="alert">{error}</div>}</>;
 }
