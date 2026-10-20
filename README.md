@@ -14,6 +14,14 @@ Data jsou chráněná Row Level Security: každý účet čte a mění jen své 
 
 Změny se načítají přes Supabase Realtime, při návratu do okna a každých 15 sekund při otevřené aplikaci. Ukládání i odstranění kontroluje revizi knihy, aby starší zařízení nepřepsalo novější obsah. Při otevřeném editoru se automatické nahrazování dat pozastaví. Chyba uložení ponechá formulář otevřený. K ukládání je potřeba internet; fronta pro ukládání bez internetu není implementovaná. Rozpracovaný formulář před zavřením stránky ulož nebo si zkopíruj jeho text.
 
+## Vyhledávání knih
+
+Přidávání knih vyhledává přes Google Books a Open Library. Google Books hledá nejprve česká vydání; pokud žádná nenajde, zkusí všechny jazyky. Volbou „Hledat i v jiných jazycích“ lze jazykové omezení vypnout rovnou. ISBN dotaz hledá konkrétní vydání bez jazykového omezení. Open Library češtinu upřednostňuje. Každý zdroj má vlastní blok výsledků; pořadí Google Books se zachovává. Záznamy Open Library, jejichž ověřené ISBN odpovídá zobrazenému vydání Google Books, se neopakují. Rozdílná ISBN nebo známé různé jazyky zůstávají oddělené.
+
+Předvyplňuje se název, autor, obálka, ISBN, počet stran a dostupná anotace. U Open Library se po výběru načtou údaje konkrétního vydání; souhrnné ISBN, medián počtu stran a rok prvního vydání díla se nepoužívají. Doplňování vybraného výsledku Google Books z Open Library vyžaduje shodné ISBN. Při nedostupnosti jednoho katalogu zůstává druhý dostupný s vysvětlením; při výpadku obou je možné ruční přidání. Úspěšné dotazy se dočasně uchovávají jen v paměti prohlížeče (5 minut, nejvýše 30 dotazů). Katalogy dostávají vyhledávací dotaz, nikoli soukromé zápisky či obsah knihovny.
+
+Pro produkční sestavení je potřeba `VITE_GOOGLE_BOOKS_API_KEY` v GitHub Actions Variables. Je to klíč používaný veřejným webem: omezit na Books API a HTTP referrery `https://kordic99.github.io/*`; pro testovací náhled také `http://127.0.0.1:5194/*`. Hodnota nepatří do zdrojových souborů. Projekt Google Cloud ponechat bez připojené fakturace. Dostupnost kvóty se ověřuje v konzoli; její vyčerpání se v aplikaci řeší pokračováním přes Open Library, automatické placené navýšení aplikace nezavádí.
+
 ## Poličky a motivy
 
 Každá kniha patří právě do jedné poličky: Přečtené, Právě čtu nebo TBR. Dřívější Odložené se slučuje do TBR; stejné pravidlo platí při importu starých záloh a zápisu ze staršího klienta. Nákupní list je nezávislé označení knihy.
@@ -34,13 +42,13 @@ Na iPhonu otevři online adresu v Safari → Sdílet → Přidat na plochu → O
 
 1. V samostatném projektu Supabase aplikuj `supabase/schema.sql` a potom `supabase/preferences.sql`. Aktualizace existujícího projektu používá `supabase/preferences.sql` a `supabase/merge-tbr.sql` (nezaváděj znovu tabulku knih). Schéma je již aplikované v připraveném projektu Liškaplikace.
 2. V Authentication → URL Configuration nastav Site URL na cílovou adresu aplikace.
-3. V GitHub Actions Variables nastav VITE_SUPABASE_URL a VITE_SUPABASE_PUBLISHABLE_KEY (moderní sb_publishable_ klíč, nikdy service_role, sb_secret_ ani heslo databáze).
+3. V GitHub Actions Variables nastav VITE_SUPABASE_URL a VITE_SUPABASE_PUBLISHABLE_KEY (moderní sb_publishable_ klíč, nikdy service_role, sb_secret_ ani heslo databáze) a VITE_GOOGLE_BOOKS_API_KEY podle části Vyhledávání knih.
 4. Settings → Pages → Source: GitHub Actions. Workflow Publish Liškaplikace kontroluje typy, testy a sestavení, poté nasadí dist-pages.
 5. GitHub Pages na tarifu Free vyžaduje veřejný repozitář. Změna viditelnosti zdrojů vyžaduje samostatné schválení vlastníka. Knihovna zůstává v Supabase za přihlášením.
 
 ## Vývoj a ověření
 
-Node.js 24 a npm. Instalace: npm ci. Kontroly: npm run typecheck, npm run test:cloud. Po úpravě pevných barev v archive.css/cloud.css spusť `node tools/sync-theme-palette.mjs` pro obnovu barev motivů. Sestavení: nastav veřejné proměnné Supabase a spusť npm run build:pages. PAGES_BASE_PATH má výchozí hodnotu /liskaplikace/.
+Node.js 24 a npm. Instalace: npm ci. Kontroly: npm run typecheck, npm run test:cloud, npm run test:catalog. Po úpravě pevných barev v archive.css/cloud.css spusť `node tools/sync-theme-palette.mjs` pro obnovu barev motivů. Sestavení: nastav veřejné proměnné Supabase a Google Books a spusť npm run build:pages. PAGES_BASE_PATH má výchozí hodnotu /liskaplikace/.
 
 Testy ověřují data každého účtu dvou klientů, ochranu před zastaralým uložením a smazáním, opakovatelný import i odkazy a obrázky v podadresáři GitHub Pages. Přímo v databázi byly transakčně ověřeny politiky vlastníka, zákaz přístupu jinému účtu, revize a prázdný výchozí stav. Testovací záznamy byly vráceny zpět transakcí. Test `tests/rls-isolation.sql` lze spustit v migrované databázi; vytvořené zkušební účty a data se vrátí zpět pomocí ROLLBACK. Kontrola security advisors nehlásí nedostatky RLS. Projekt má upozornění na vypnutou kontrolu uniklých hesel (nastavení služby Auth).
 

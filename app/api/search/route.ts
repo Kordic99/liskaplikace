@@ -1,2 +1,9 @@
-import { getChatGPTUser } from "../../chatgpt-auth";
-export async function GET(req:Request){if(!await getChatGPTUser())return Response.json({error:"Nejsi přihlášen/a."},{status:401});const q=new URL(req.url).searchParams.get("q")?.trim()??"";if(q.length<2||q.length>200)return Response.json({error:"Zadej 2–200 znaků."},{status:400});try{const url=new URL("https://openlibrary.org/search.json");url.search=new URLSearchParams({q,lang:"cs",limit:"12",fields:"key,title,author_name,cover_i,first_publish_year,number_of_pages_median,isbn,editions,editions.title,editions.key,editions.cover_i"}).toString();const res=await fetch(url,{headers:{"User-Agent":"DraciArchiv/1.0 (private reading journal)"},signal:AbortSignal.timeout(12000)});if(!res.ok)throw new Error();const data=await res.json() as {docs:any[]};return Response.json({results:data.docs.map(d=>{const edition=d.editions?.docs?.[0];const cover=edition?.cover_i??d.cover_i;return {key:d.key,title:edition?.title??d.title,author:(d.author_name??[]).join(", "),cover:cover?`https://covers.openlibrary.org/b/id/${cover}-L.jpg`:"",pages:d.number_of_pages_median??0,isbn:d.isbn?.[0]??"",year:d.first_publish_year??null}})});}catch{return Response.json({error:"Katalog teď neodpovídá. Zkus to znovu nebo přidej knihu ručně."},{status:502})}}
+import {getChatGPTUser} from "../../chatgpt-auth";
+import {searchCatalog} from "../../catalog";
+export async function GET(request:Request){
+ if(!await getChatGPTUser())return Response.json({error:"Nejsi přihlášen/a."},{status:401});
+ const query=new URL(request.url).searchParams.get("q")?.trim()??"";
+ if(query.length<2||query.length>200)return Response.json({error:"Zadej 2–200 znaků."},{status:400});
+ try{return Response.json(await searchCatalog(query,{googleBooksKey:process.env.VITE_GOOGLE_BOOKS_API_KEY??"",allLanguages:new URL(request.url).searchParams.get("languages")==="all"}))}
+ catch(error){return Response.json({error:(error as Error).message},{status:502})}
+}

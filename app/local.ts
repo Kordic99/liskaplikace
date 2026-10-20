@@ -1,6 +1,7 @@
 import { bookSchema, type Book } from "./model";
 import {parseBackup,mergeBackup,MAX_BACKUP_BYTES} from "./backup";
 import {defaultPreferences,preferencesSchema} from "./preferences";
+import {searchCatalog} from "./catalog";
 let standalone=false;
 let staticBase:string|undefined;
 export const enableStaticRouting=(base:string)=>{staticBase=base};
@@ -35,11 +36,7 @@ export async function localApi(path:string,method:string,body?:any):Promise<any>
   if(new TextEncoder().encode(JSON.stringify(body)).byteLength>MAX_BACKUP_BYTES)throw new Error("Záloha může mít nejvýše 5 MB.");
   const result=mergeBackup(read(),parseBackup(body));write(result.books);return {added:result.added,skipped:result.skipped};
  }
- if(url.pathname==="/api/search"){
- const q=url.searchParams.get("q")?.trim()??"";
- const target=new URL("https://openlibrary.org/search.json");target.search=new URLSearchParams({q,lang:"cs",limit:"12",fields:"key,title,author_name,cover_i,number_of_pages_median,isbn,first_publish_year,editions,editions.title,editions.cover_i"}).toString();
- try{const res=await fetch(target,{signal:AbortSignal.timeout(12000)});if(!res.ok)throw new Error();const data:any=await res.json();return {results:data.docs.map((d:any)=>{const e=d.editions?.docs?.[0],cover=e?.cover_i??d.cover_i;return {key:d.key,title:e?.title??d.title,author:(d.author_name??[]).join(", "),pages:d.number_of_pages_median??0,isbn:d.isbn?.[0]??"",year:d.first_publish_year??null,cover:cover?`https://covers.openlibrary.org/b/id/${cover}-L.jpg`:""}})}}catch{throw new Error("Katalog neodpovídá. Připoj se k internetu nebo přidej knihu ručně.")}
- }
+ if(url.pathname==="/api/search")return searchCatalog(url.searchParams.get("q")??"",{allLanguages:url.searchParams.get("languages")==="all"});
  if(url.pathname!=="/api/books")throw new Error("Neznámá operace.");
  const books=read();if(method==="GET")return books;
  if(method==="DELETE"){

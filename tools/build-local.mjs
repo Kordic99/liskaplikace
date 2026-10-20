@@ -5,10 +5,10 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.resolve(process.argv[2]??path.join(root,'dist-local/index.html'));
-const bundle=await build({entryPoints:[path.join(root,'tools/local-entry.tsx')],bundle:true,format:'iife',minify:true,target:'es2020',write:false});
+const bundle=await build({entryPoints:[path.join(root,'tools/local-entry.tsx')],bundle:true,format:'iife',minify:true,target:'es2020',write:false,define:{__GOOGLE_BOOKS_KEY__:JSON.stringify(process.env.VITE_GOOGLE_BOOKS_API_KEY??'')}});
 const image=await fs.readFile(path.join(root,'public/images/dragon-library.webp'));
 const sticker=await fs.readFile(path.join(root,'public/images/reading-sticker.webp'));
-let css=(await Promise.all(['archive.css','theme-palette.css','themes.css'].map(name=>fs.readFile(path.join(root,'app',name),'utf8')))).join('\n').replaceAll('/images/dragon-library.webp','data:image/webp;base64,'+image.toString('base64'));
+let css=(await Promise.all(['archive.css','theme-palette.css','themes.css','catalog.css'].map(name=>fs.readFile(path.join(root,'app',name),'utf8')))).join('\n').replaceAll('/images/dragon-library.webp','data:image/webp;base64,'+image.toString('base64'));
 let js=bundle.outputFiles[0].text.replaceAll('/images/reading-sticker.webp','data:image/webp;base64,'+sticker.toString('base64'));
 for(const name of themeImageFiles){const data='data:image/webp;base64,'+(await fs.readFile(path.join(root,'public/images',name))).toString('base64');css=css.replaceAll('/images/'+name,data);js=js.replaceAll('/images/'+name,data)}
 js=js.replaceAll('</script','<\\/script');

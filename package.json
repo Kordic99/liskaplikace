@@ -15,7 +15,8 @@
     "typecheck": "tsc --project tsconfig.pages.json --noEmit",
     "typecheck:sites": "tsc --noEmit",
     "build:pages": "node tools/build-pages.mjs",
-    "test:cloud": "node tests/cloud-transport.mjs"
+    "test:cloud": "node tests/cloud-transport.mjs",
+    "test:catalog": "node tests/catalog.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
