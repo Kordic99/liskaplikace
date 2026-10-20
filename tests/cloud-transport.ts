@@ -81,11 +81,11 @@ async function main(){
  memory.set('draci-archiv-local-v1',JSON.stringify([{...fixtures[6],status:'paused'}]));
  assert.equal((await localApi('/api/books','GET'))[0].status,'tbr');
  assert.equal((await localApi('/api/preferences','GET')).themeId,'forest');
- (globalThis as any).window={location:{href:'https://example.github.io/draci-archiv/?view=tbr',protocol:'https:'}};
- enableStaticRouting('/draci-archiv/');
- assert.equal(appHref('/kniha/'+created.id),'https://example.github.io/draci-archiv/?book='+created.id);
- assert.equal(appHref('/?view=shopping'),'https://example.github.io/draci-archiv/?view=shopping');
- assert.equal(assetHref('/images/reading-sticker.webp'),'/draci-archiv/images/reading-sticker.webp');
+ (globalThis as any).window={location:{href:'https://example.github.io/liskaplikace/?view=tbr',protocol:'https:'}};
+ enableStaticRouting('/liskaplikace/');
+ assert.equal(appHref('/kniha/'+created.id),'https://example.github.io/liskaplikace/?book='+created.id);
+ assert.equal(appHref('/?view=shopping'),'https://example.github.io/liskaplikace/?view=shopping');
+ assert.equal(assetHref('/images/reading-sticker.webp'),'/liskaplikace/images/reading-sticker.webp');
  console.log('PASS shared cloud transport, protected revisions, repeatable import and GitHub Pages routes');
 }
 void main().catch(error=>{console.error(error);process.exitCode=1});

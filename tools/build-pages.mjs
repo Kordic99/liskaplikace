@@ -5,7 +5,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(root,'dist-pages');
-const base=process.env.PAGES_BASE_PATH??'/draci-archiv/';
+const base=process.env.PAGES_BASE_PATH??'/liskaplikace/';
 if(!/^\/[a-zA-Z0-9_/-]*\/$/.test(base)&&base!=='/')throw new Error('Invalid Pages base path');
 const url=process.env.VITE_SUPABASE_URL??'',key=process.env.VITE_SUPABASE_PUBLISHABLE_KEY??'';
 if(!url||!key)throw new Error('Missing public Supabase configuration');

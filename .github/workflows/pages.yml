@@ -26,7 +26,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          PAGES_BASE_PATH: /draci-archiv/
+          PAGES_BASE_PATH: /liskaplikace/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist-pages

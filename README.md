@@ -4,7 +4,9 @@ Osobní čtenářská knihovna pro počítač i iPhone. Přehled knih, TBR, záp
 
 ## Online verze
 
-GitHub Pages poskytuje aplikaci a Supabase zajišťuje přihlášení i data každého účtu. Cílová adresa: https://kordic99.github.io/draci-archiv/
+GitHub Pages poskytuje aplikaci a Supabase zajišťuje přihlášení i data každého účtu. Cílová adresa: https://kordic99.github.io/liskaplikace/
+
+Původní adresa `/draci-archiv/` přesměrovává na `/liskaplikace/` a zachovává odkaz na knihu i návrat z přihlašovacího e-mailu. Zdrojový repozitář je `Kordic99/liskaplikace`.
 
 Na počítači i telefonu použij **stejný účet aplikace**. Účet v administraci Supabase je jiný než přihlášení do Liškaplikace. Nejdřív si jednou vytvoř účet v aplikaci a potvrď e-mail, pokud to Supabase vyžaduje.
 
@@ -38,7 +40,7 @@ Na iPhonu otevři online adresu v Safari → Sdílet → Přidat na plochu → O
 
 ## Vývoj a ověření
 
-Node.js 24 a npm. Instalace: npm ci. Kontroly: npm run typecheck, npm run test:cloud. Po úpravě pevných barev v archive.css/cloud.css spusť `node tools/sync-theme-palette.mjs` pro obnovu barev motivů. Sestavení: nastav veřejné proměnné Supabase a spusť npm run build:pages. PAGES_BASE_PATH má výchozí hodnotu /draci-archiv/.
+Node.js 24 a npm. Instalace: npm ci. Kontroly: npm run typecheck, npm run test:cloud. Po úpravě pevných barev v archive.css/cloud.css spusť `node tools/sync-theme-palette.mjs` pro obnovu barev motivů. Sestavení: nastav veřejné proměnné Supabase a spusť npm run build:pages. PAGES_BASE_PATH má výchozí hodnotu /liskaplikace/.
 
 Testy ověřují data každého účtu dvou klientů, ochranu před zastaralým uložením a smazáním, opakovatelný import i odkazy a obrázky v podadresáři GitHub Pages. Přímo v databázi byly transakčně ověřeny politiky vlastníka, zákaz přístupu jinému účtu, revize a prázdný výchozí stav. Testovací záznamy byly vráceny zpět transakcí. Test `tests/rls-isolation.sql` lze spustit v migrované databázi; vytvořené zkušební účty a data se vrátí zpět pomocí ROLLBACK. Kontrola security advisors nehlásí nedostatky RLS. Projekt má upozornění na vypnutou kontrolu uniklých hesel (nastavení služby Auth).
 
