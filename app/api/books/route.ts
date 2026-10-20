@@ -6,7 +6,7 @@ import { bookSchema } from "../../model";
 import { z } from "zod";
 export const dynamic="force-dynamic";
 const json=(data:unknown,status=200)=>Response.json(data,{status,headers:{"Cache-Control":"no-store"}});
-export async function GET(){const user=await getChatGPTUser();if(!user)return json({error:"Přihlas se pro přístup ke knihovně."},401);const rows=await getDb().select().from(books).where(eq(books.owner,user.userId));return json(rows.map(r=>({...JSON.parse(r.data),id:r.id,revision:r.revision})));}
+export async function GET(){const user=await getChatGPTUser();if(!user)return json({error:"Přihlas se pro přístup ke knihovně."},401);const rows=await getDb().select().from(books).where(eq(books.owner,user.userId));return json(rows.map(r=>({...bookSchema.parse(JSON.parse(r.data)),id:r.id,revision:r.revision})));}
 export async function POST(req:Request){const user=await getChatGPTUser();if(!user)return json({error:"Nejsi přihlášen/a."},401);let body;try{body=await req.json()}catch{return json({error:"Neplatná data."},400)}const parsed=bookSchema.safeParse(body);if(!parsed.success)return json({error:parsed.error.issues[0]?.message},400);const id=crypto.randomUUID(),now=new Date().toISOString();await getDb().insert(books).values({id,owner:user.userId,data:JSON.stringify(parsed.data),createdAt:now,updatedAt:now});return json({...parsed.data,id,revision:0},201);}
 export async function PUT(req:Request){
  const user=await getChatGPTUser();if(!user)return json({error:"Nejsi přihlášen/a."},401);
