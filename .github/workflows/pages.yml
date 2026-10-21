@@ -1,7 +1,7 @@
-name: Publish Liškaplikace
+name: Publish Liškaplikace PROD + TEST
 on:
   push:
-    branches: [main]
+    branches: [main, test]
   workflow_dispatch:
 permissions:
   actions: read
@@ -17,28 +17,68 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          ref: ${{ github.ref_name == 'main' && github.sha || 'main' }}
+          path: production
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name == 'test' && github.sha || 'test' }}
+          path: testing
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
-      - run: node tools/check-releases.mjs --require-new
+          cache-dependency-path: |
+            production/package-lock.json
+            testing/package-lock.json
+      - name: Validate PROD release history
+        working-directory: production
+        run: |
+          if [ "$TRIGGER_BRANCH" = main ]; then
+            PRODUCTION_SHA=$(git rev-parse HEAD) node tools/check-releases.mjs --require-new
+          else
+            node tools/check-releases.mjs
+          fi
         env:
+          TRIGGER_BRANCH: ${{ github.ref_name }}
           GH_TOKEN: ${{ github.token }}
-      - run: npm ci --no-audit --no-fund
-      - run: npm run typecheck
-      - run: npm run test:cloud
-      - run: npm run test:catalog
-      - run: npm run test:releases
-      - run: npm run build:pages
+      - name: Check and build PROD
+        working-directory: production
+        run: |
+          npm ci --no-audit --no-fund
+          npm run typecheck
+          npm run test:cloud
+          npm run test:catalog
+          npm run test:releases
+          npm run test:covers --if-present
+          BUILD_COMMIT=$(git rev-parse HEAD) npm run build:pages
         env:
+          APP_ENV: production
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_GOOGLE_BOOKS_API_KEY: ${{ vars.VITE_GOOGLE_BOOKS_API_KEY }}
           PAGES_BASE_PATH: /liskaplikace/
+      - name: Check and build TEST
+        working-directory: testing
+        run: |
+          npm ci --no-audit --no-fund
+          node tools/check-releases.mjs
+          npm run typecheck
+          npm run test:cloud
+          npm run test:catalog
+          npm run test:releases
+          npm run test:covers
+          BUILD_COMMIT=$(git rev-parse HEAD) npm run build:pages
+        env:
+          APP_ENV: test
+          VITE_GOOGLE_BOOKS_API_KEY: ${{ vars.VITE_GOOGLE_BOOKS_API_KEY }}
+          PAGES_BASE_PATH: /liskaplikace/test/
+      - name: Assemble isolated applications
+        run: node production/tools/assemble-pages.mjs production/dist-pages testing/dist-pages-test dist-paired
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist-pages
+          path: dist-paired
   deploy:
     needs: build
     runs-on: ubuntu-latest

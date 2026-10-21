@@ -57,6 +57,8 @@ next-env.d.ts
 *.tsbuildinfo
 /dist-local/
 /dist-pages/
+/dist-pages-test/
+/dist-paired/
 # Original reference artwork and Site identity stay local.
 /.openai/
 /public/images/*.png

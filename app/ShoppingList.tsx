@@ -1,12 +1,13 @@
 "use client";
-import { useMemo, useState } from "react";
+import {useCoverImage} from "./use-cover-image";
+import { useMemo, useState, useEffect } from "react";
 import { ShoppingBag, Plus, Search, Check, X, BookOpen, ArrowUpRight, Flag, ChevronDown } from "lucide-react";
 import { type Book, priorityLabel } from "./model";
 import { appHref } from "./local";
 
 function ShoppingCover({book}:{book:Book}){
- const [failed,setFailed]=useState(false);
- return <span className="shopping-cover">{book.cover&&!failed?<img src={book.cover} alt={`Obálka: ${book.title}`} onError={()=>setFailed(true)} referrerPolicy="no-referrer"/>:<BookOpen size={23}/>}</span>;
+ const src=useCoverImage(book);const [failed,setFailed]=useState(false);useEffect(()=>setFailed(false),[src]);
+ return <span className="shopping-cover">{src&&!failed?<img src={src} alt={`Obálka: ${book.title}`} onError={()=>setFailed(true)} referrerPolicy="no-referrer"/>:<BookOpen size={23}/>}</span>;
 }
 export default function ShoppingList({books,busy,onAdd,onToggle}:{books:Book[];busy:boolean;onAdd:()=>void;onToggle:(book:Book,wanted:boolean)=>Promise<boolean>}){
  const [query,setQuery]=useState(""),[selected,setSelected]=useState(""),[sort,setSort]=useState("priority");

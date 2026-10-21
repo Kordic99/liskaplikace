@@ -17,7 +17,8 @@
     "build:pages": "node tools/build-pages.mjs",
     "test:cloud": "node tests/cloud-transport.mjs",
     "test:catalog": "node tests/catalog.mjs",
-    "test:releases": "node tests/releases.mjs"
+    "test:releases": "node tests/releases.mjs",
+    "test:covers": "node tests/covers.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

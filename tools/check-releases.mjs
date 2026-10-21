@@ -11,7 +11,7 @@ if(process.argv.includes('--require-new')){
   const sha=runs?.workflow_runs?.[0]?.head_sha;
   if(sha){
    if(!/^[a-f0-9]{40}$/.test(sha))throw new Error('Invalid deployment reference');
-   sameBuild=sha===process.env.GITHUB_SHA;
+   sameBuild=sha===(process.env.PRODUCTION_SHA??process.env.GITHUB_SHA);
    const file=await get('contents/app/releases.json?ref='+sha,true);
    if(file)previous=JSON.parse(Buffer.from(file.content,'base64').toString('utf8'));
   }

@@ -7,6 +7,7 @@
   },
   "include": [
     "tools/cloud-entry.tsx",
+    "tools/test-entry.tsx",
     "tests/**/*.ts"
   ],
   "exclude": ["node_modules", "dist-pages", ".sites-runtime"]

@@ -1,5 +1,22 @@
 # Liškaplikace
 
+## PROD a TEST
+
+- PROD: https://kordic99.github.io/liskaplikace/ — větev `main`, přihlášení a soukromé knihovny v Supabase.
+- TEST: https://kordic99.github.io/liskaplikace/test/ — větev `test`, bez přihlášení, samostatná zkušební data v localStorage a obrázky v IndexedDB. Nesynchronizuje se mezi PC a telefonem. Vymazání dat prohlížeče smaže i TEST; lze použít JSON zálohu.
+
+Nové změny se vyvíjejí a nejdřív nasazují na `test`. Přesun do `main` po ověření znamená vydání do PRODu; testovací uživatelská data se nepřesouvají. Workflow sestaví každou verzi z její vlastní větve a publikuje je společně, aby testovací nasazení nesmazalo PROD. Do TESTu se nepředávají produkční údaje Supabase; sestavení je odmítne. TEST má vlastní cesty, manifest a výrazný fialový pruh. Google Books + Open Library zůstávají vyhledávacími zdroji v obou prostředích. Vlastní společný katalog zatím není zavedený; jeho návrh a zdroje dat jsou budoucí práce v TESTu.
+
+Při prvním založení prostředí musí existovat obě větve se zdroji podporujícími tento workflow. Pro lokální TEST použij `APP_ENV=test`, `PAGES_BASE_PATH=/liskaplikace/test/`, `VITE_GOOGLE_BOOKS_API_KEY` a `node tools/build-pages.mjs`; proměnné Supabase musí být prázdné. Výstup je `dist-pages-test`. PROD používá stávající `dist-pages`. Spojení ověřuje `node tools/assemble-pages.mjs <prod-output> <test-output> <empty-output>`.
+
+## Vlastní obálky
+
+V editoru knihy lze nahrát JPG, PNG, WebP nebo HEIC do 20 MB, pokud formát dokáže otevřít prohlížeč. Obrázek se převede na JPEG nejvýše 600 × 900 px / 256 kB. Původní adresa `cover` zůstává a soukromá varianta používá pole `customCover`; starší knihy dostanou prázdnou hodnotu automaticky. Vrácení původní obálky neovlivní ostatní údaje knihy.
+
+PROD vyžaduje jednorázové použití `supabase/book-covers.sql` (v projektu Liškaplikace již provedeno). Bucket `book-covers` je soukromý. RLS povoluje čtení a nové nahrání pouze vlastníkovi ve složce jeho účtu; obrázky se nepřepisují a nejsou veřejně dostupné. Starší obrázky se zachovávají pro kompatibilitu záloh. TEST ukládá obrázky samostatně pouze v prohlížeči. Zálohy obsahují `coverImages` s obrázky, celkově nejvýše 5 MB; při importu se vytvoří nové soukromé soubory v cílovém účtu či místním úložišti. Import nepřepisuje existující knihy.
+
+Kontroly navíc: `npm run test:covers`. SQL test `tests/cover-storage-rls.sql` ověřuje oddělení dvou dočasných účtů v transakci zakončené ROLLBACK.
+
 Osobní čtenářská knihovna pro počítač i iPhone. Přehled knih, TBR, zápisky, citáty, postavy, hodnocení a nákupní list se čtyřmi motivy nastavitelnými pro každý účet. Samolepka je nahoře u uvítání, mobil má spodní navigaci a podporu přidání na plochu.
 
 ## Online verze

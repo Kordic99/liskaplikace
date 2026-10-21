@@ -6,6 +6,8 @@ import { LibraryApiError, type LibraryTransport } from "./client-api";
 import { localApi } from "./local";
 import {defaultPreferences,preferencesSchema} from "./preferences";
 import {releaseReadSchema,releaseAcknowledgementSchema} from "./releases";
+import {COVER_BUCKET,ownedCover,validateCoverBlob} from "./cover-files";
+import {restoreCoverBackup} from "./cover-backup";
 
 const rowSchema=z.object({id:z.string().uuid(),revision:z.number().int().nonnegative(),data:bookSchema});
 function decode(row:unknown):Book{
@@ -21,6 +23,16 @@ function fail(error:{code?:string;message?:string}):never{
 export function supabaseLibrary(client:SupabaseClient,userId:string):LibraryTransport{
  return async(path,method,body:any)=>{
   const url=new URL(path,"https://archive.invalid");
+  if(url.pathname==="/api/covers"){
+   if(method==="POST"){
+    const blob=await validateCoverBlob(body),path=`${userId}/${crypto.randomUUID()}.jpg`;
+    const {error}=await client.storage.from(COVER_BUCKET).upload(path,blob,{contentType:"image/jpeg",upsert:false,cacheControl:"3600"});
+    if(error)fail(error);return {path};
+   }
+   const path=url.searchParams.get("path")??"";
+   if(method!=="GET"||!ownedCover(path,userId))throw new LibraryApiError("Tato obálka nepatří k tvému účtu.",403);
+   const {data,error}=await client.storage.from(COVER_BUCKET).download(path);if(error)fail(error);return data;
+  }
   if(url.pathname==="/api/releases"){
    if(method==="GET"){
     const {data,error}=await client.from("archive_release_reads").select("last_seen_release").eq("user_id",userId).maybeSingle();
@@ -51,14 +63,16 @@ export function supabaseLibrary(client:SupabaseClient,userId:string):LibraryTran
   if(url.pathname==="/api/search")return localApi(path,"GET");
   if(url.pathname==="/api/import"&&method==="POST"){
    if(new TextEncoder().encode(JSON.stringify(body)).byteLength>MAX_BACKUP_BYTES)throw new LibraryApiError("Záloha může mít nejvýše 5 MB.",400);
-   const books=parseBackup(body),unique=[...new Map(books.map(book=>[book.id,book])).values()];
+   const books=parseBackup(body),unique=[...new Map(books.map(book=>[book.id,book])).values()],existing=new Set<string>();
+   for(let offset=0;;offset+=500){const {data,error}=await client.from("archive_books").select("id").eq("user_id",userId).order("id").range(offset,offset+499);if(error)fail(error);for(const row of data??[])existing.add(row.id);if((data?.length??0)<500)break}
+   const restored=await restoreCoverBackup(body,unique.filter(book=>!existing.has(book.id)),async blob=>{const path=`${userId}/${crypto.randomUUID()}.jpg`;const {error}=await client.storage.from(COVER_BUCKET).upload(path,blob,{contentType:"image/jpeg",upsert:false});if(error)fail(error);return {path}},path=>ownedCover(path,userId));
    let added=0;
-   for(let i=0;i<unique.length;i+=25){
-    const rows=unique.slice(i,i+25).map(({id,revision,...data})=>({id,user_id:userId,revision:0,data}));
+   for(let i=0;i<restored.books.length;i+=25){
+    const rows=restored.books.slice(i,i+25).map(({id,revision,...data})=>({id,user_id:userId,revision:0,data}));
     const {data,error}=await client.from("archive_books").upsert(rows,{onConflict:"user_id,id",ignoreDuplicates:true}).select("id");
     if(error)fail(error);added+=data?.length??0;
    }
-   return {added,skipped:books.length-added};
+   return {added,skipped:books.length-added,...(restored.missingCovers?{missingCovers:restored.missingCovers}:{})};
   }
   if(url.pathname!=="/api/books")throw new LibraryApiError("Neznámá operace.",400);
   if(method==="GET"){
@@ -78,6 +92,7 @@ export function supabaseLibrary(client:SupabaseClient,userId:string):LibraryTran
   }
   const parsed=bookSchema.safeParse(body);
   if(!parsed.success)throw new LibraryApiError(parsed.error.issues[0]?.message??"Neplatné údaje o knize.",400);
+  if(parsed.data.customCover&&!ownedCover(parsed.data.customCover,userId))throw new LibraryApiError("Vlastní obálka musí patřit k tvému účtu.",403);
   if(method==="POST"){
    const {data,error}=await client.from("archive_books").insert({id:crypto.randomUUID(),user_id:userId,revision:0,data:parsed.data}).select("id,revision,data").single();
    if(error)fail(error);return decode(data);

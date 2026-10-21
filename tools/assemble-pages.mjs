@@ -1,0 +1,15 @@
+import fs from 'node:fs/promises';import path from 'node:path';import assert from 'node:assert/strict';
+const [production,testing,output]=process.argv.slice(2);
+if(!production||!testing||!output)throw new Error('Expected production, test and output directories');
+const roots=[production,testing,output].map(value=>path.resolve(value));
+for(let i=0;i<roots.length;i++)for(let j=i+1;j<roots.length;j++)if(roots[i]===roots[j]||roots[i].startsWith(roots[j]+path.sep)||roots[j].startsWith(roots[i]+path.sep))throw new Error('Build directories must be separate');
+const live=JSON.parse(await fs.readFile(path.join(production,'deployment.json'),'utf8')),test=JSON.parse(await fs.readFile(path.join(testing,'deployment.json'),'utf8'));
+assert.equal(live.environment,'production');assert.equal(test.environment,'test');
+const testHtml=await fs.readFile(path.join(testing,'index.html'),'utf8'),jsFile=testHtml.match(/src="\/liskaplikace\/test\/(assets\/[^" ]+\.js)"/)?.[1];
+if(!jsFile)throw new Error('TEST asset paths must be isolated');
+const js=await fs.readFile(path.join(testing,jsFile),'utf8');
+if(/https:\/\/[a-z0-9]+\.supabase\.co|sb_publishable_/.test(js))throw new Error('Production connection leaked into TEST');
+await fs.mkdir(output,{recursive:true});
+if((await fs.readdir(output)).length)throw new Error('Refusing to assemble over an existing output');
+await fs.cp(production,output,{recursive:true});await fs.cp(testing,path.join(output,'test'),{recursive:true});
+console.log('PASS PROD and TEST assembled with isolated paths and no production connection in TEST');

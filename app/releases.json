@@ -18,5 +18,15 @@
       "Když vynecháš více aktualizací, jejich novinky najdeš společně v jednom okně.",
       "Potvrzení se ukládá k tvému účtu a platí na počítači i telefonu. V Nastavení se můžeš k historii kdykoli vrátit."
     ]
+  },
+  {
+    "id": 3,
+    "date": "2026-10-21",
+    "title": "Obálka podle tvého vydání",
+    "changes": [
+      "Ke knize si můžeš nahrát vlastní obrázek obálky z počítače nebo telefonu.",
+      "Původní obálka z katalogu zůstává zachovaná; můžeš se k ní kdykoli vrátit.",
+      "Vlastní obálky patří jen tvému účtu, zobrazí se i na druhém zařízení a jsou součástí zálohy."
+    ]
   }
 ]
