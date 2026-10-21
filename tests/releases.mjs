@@ -5,3 +5,4 @@ await mkdir('.sites-runtime',{recursive:true});
 await build({entryPoints:['tests/releases.ts'],outfile:'.sites-runtime/test-releases.mjs',bundle:true,platform:'node',format:'esm'});
 const result=spawnSync(process.execPath,['.sites-runtime/test-releases.mjs'],{stdio:'inherit'});
 process.exitCode=result.status??1;
+if(!process.exitCode){const gate=spawnSync(process.execPath,['tests/release-deployment-gate.mjs'],{stdio:'inherit'});process.exitCode=gate.status??1}

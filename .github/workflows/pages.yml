@@ -14,6 +14,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,13 +38,8 @@ jobs:
       - name: Validate PROD release history
         working-directory: production
         run: |
-          if [ "$TRIGGER_BRANCH" = main ]; then
-            PRODUCTION_SHA=$(git rev-parse HEAD) node tools/check-releases.mjs --require-new
-          else
-            node tools/check-releases.mjs
-          fi
+          PRODUCTION_SHA=$(git rev-parse HEAD) node tools/check-releases.mjs --require-new
         env:
-          TRIGGER_BRANCH: ${{ github.ref_name }}
           GH_TOKEN: ${{ github.token }}
       - name: Check and build PROD
         working-directory: production
@@ -79,13 +77,6 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist-paired
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
