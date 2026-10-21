@@ -1,10 +1,12 @@
-import {useEffect,useRef,useState,type FormEvent,type ReactNode} from "react";
+import {useEffect,useRef,useState,type FormEvent} from "react";
 import {ArrowRight,Library,LoaderCircle,Plus,Search} from "lucide-react";
 import {api} from "./client-api";
 import {catalogNames,completeCatalogBook,googleBooksConfigured,type CatalogBook,type CatalogResponse} from "./catalog";
+import {ownCatalogComponent,type BookCatalogProps} from "./catalog-mode";
 
 const languages:Record<string,string>={cs:"Čeština",sk:"Slovenština",en:"Angličtina",de:"Němčina",fr:"Francouzština",es:"Španělština",pl:"Polština"};
-export default function BookCatalog({onPick,onManual,renderCover}:{onPick:(book:CatalogBook,warning?:string)=>void;onManual:()=>void;renderCover:(book:CatalogBook)=>ReactNode}){
+export default function BookCatalog(props:BookCatalogProps){const OwnCatalog=ownCatalogComponent();return OwnCatalog?<OwnCatalog {...props}/>:<ExternalBookCatalog {...props}/>}
+function ExternalBookCatalog({onPick,onManual,renderCover}:BookCatalogProps){
  const [query,setQuery]=useState(""),[results,setResults]=useState<CatalogBook[]>([]),[warnings,setWarnings]=useState<string[]>([]);
  const [searched,setSearched]=useState(false),[searching,setSearching]=useState(false),[selecting,setSelecting]=useState<string|null>(null),[error,setError]=useState("");
  const [allLanguages,setAllLanguages]=useState(false),[googleLanguage,setGoogleLanguage]=useState<"cs"|"all">("cs");

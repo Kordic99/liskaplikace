@@ -17,6 +17,7 @@
     "build:pages": "node tools/build-pages.mjs",
     "test:cloud": "node tests/cloud-transport.mjs",
     "test:catalog": "node tests/catalog.mjs",
+    "test:own-catalog": "node tests/own-catalog.mjs",
     "test:releases": "node tests/releases.mjs",
     "test:covers": "node tests/covers.mjs"
   },

@@ -5,6 +5,7 @@ import {searchCatalog} from "./catalog";
 import {localCover,saveLocalCover} from "./local-covers";
 import {customCoverSchema} from "./cover-files";
 import {restoreCoverBackup} from "./cover-backup";
+import {ownCatalogSearch} from "./catalog-mode";
 let standalone=false;
 let staticBase:string|undefined;
 export const enableStaticRouting=(base:string)=>{staticBase=base};
@@ -49,7 +50,7 @@ export async function localApi(path:string,method:string,body?:any):Promise<any>
   const restored=await restoreCoverBackup(body,[...new Map(incoming.filter(book=>!ids.has(book.id)).map(book=>[book.id,book])).values()],blob=>saveLocalCover(namespace,blob),path=>path.startsWith("local/"));
   const result=mergeBackup(existing,restored.books);write(result.books);return {added:result.added,skipped:incoming.length-result.added,...(restored.missingCovers?{missingCovers:restored.missingCovers}:{})};
  }
- if(url.pathname==="/api/search")return searchCatalog(url.searchParams.get("q")??"",{allLanguages:url.searchParams.get("languages")==="all"});
+ if(url.pathname==="/api/search")return namespace==="liskaplikace-test-v1"?ownCatalogSearch(url.searchParams.get("q")??""):searchCatalog(url.searchParams.get("q")??"",{allLanguages:url.searchParams.get("languages")==="all"});
  if(url.pathname!=="/api/books")throw new Error("Neznámá operace.");
  const books=read();if(method==="GET")return books;
  if(method==="DELETE"){

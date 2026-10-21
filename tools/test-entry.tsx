@@ -1,9 +1,14 @@
 import {createRoot} from "react-dom/client";
 import Archive from "../app/Archive";
 import {enableLocal,enableStaticRouting} from "../app/local";
+import {configureBookCatalog} from "../app/catalog-mode";
+import OwnBookCatalog from "../app/OwnBookCatalog";
+import {asCatalogBook,findOwnEditions} from "../app/own-catalog";
+import {loadOwnCatalog} from "../app/own-catalog-store";
 declare const __BASE_PATH__:string;
 declare const __BUILD_COMMIT__:string;
 enableStaticRouting(__BASE_PATH__);enableLocal("test");
+configureBookCatalog(OwnBookCatalog,async query=>({results:findOwnEditions(await loadOwnCatalog(),query).slice(0,100).map(asCatalogBook),warnings:[],googleLanguage:"cs"}));
 document.body.classList.add("test-environment");
 const bookId=new URLSearchParams(location.search).get("book")??undefined;
 createRoot(document.getElementById("root")!).render(<><div className="environment-banner" role="status"><strong>TEST</strong><span>Zkušební data pouze v tomto prohlížeči.</span><small>{__BUILD_COMMIT__.slice(0,7)}</small><a href="/liskaplikace/">Otevřít PROD ↗</a></div><Archive bookId={bookId}/></>);

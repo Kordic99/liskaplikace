@@ -55,6 +55,7 @@ next-env.d.ts
 /outputs/
 /work/
 *.tsbuildinfo
+__pycache__/
 /dist-local/
 /dist-pages/
 /dist-pages-test/

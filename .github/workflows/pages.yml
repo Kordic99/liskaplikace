@@ -67,10 +67,10 @@ jobs:
           npm run test:catalog
           npm run test:releases
           npm run test:covers
+          npm run test:own-catalog
           BUILD_COMMIT=$(git rev-parse HEAD) npm run build:pages
         env:
           APP_ENV: test
-          VITE_GOOGLE_BOOKS_API_KEY: ${{ vars.VITE_GOOGLE_BOOKS_API_KEY }}
           PAGES_BASE_PATH: /liskaplikace/test/
       - name: Assemble isolated applications
         run: node production/tools/assemble-pages.mjs production/dist-pages testing/dist-pages-test dist-paired

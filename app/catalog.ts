@@ -3,7 +3,7 @@ export const catalogNames:Record<CatalogSource,string> = {"google-books":"Google
 export type CatalogBook = {
  key:string; title:string; author:string; cover:string; pages:number; isbn:string;
  isbns:string[]; year:number|null; language:string; publisher:string; description:string;
- sources:CatalogSource[]; editionId?:string;
+ sources:CatalogSource[]; editionId?:string; series?:string;
 };
 export type CatalogResponse = {results:CatalogBook[]; warnings:string[]; googleLanguage:"cs"|"all"};
 type Options = {googleBooksKey?:string; fetcher?:typeof fetch; allLanguages?:boolean};
