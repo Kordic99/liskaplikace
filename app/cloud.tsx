@@ -1,7 +1,8 @@
 import {useEffect,useState,type FormEvent} from "react";
 import {createClient,type Session,type SupabaseClient} from "@supabase/supabase-js";
-import {BookOpen,LockKeyhole,LoaderCircle} from "lucide-react";
+import {LockKeyhole,LoaderCircle} from "lucide-react";
 import Archive from "./Archive";
+import AppLogo from "./AppLogo";
 import {configureLibraryTransport} from "./client-api";
 import {supabaseLibrary} from "./supabase-library";
 import {enableStaticRouting} from "./local";
@@ -19,7 +20,7 @@ const readableError=(error:{message:string})=>{
  if(/already registered/i.test(error.message))return "Tento účet už existuje. Zkus se přihlásit nebo obnovit heslo.";
  return "Požadavek se nepodařilo dokončit. Zkontroluj připojení a zkus to znovu.";
 };
-function Gate({children}:{children:React.ReactNode}){return <main className="cloud-gate"><section className="cloud-card"><div className="cloud-emblem"><BookOpen size={31}/><span>✧</span></div><div className="eyebrow">TVÁ OSOBNÍ KNIHOVNA</div><h1>Liškaplikace<span className="gold">.</span></h1>{children}</section></main>}
+function Gate({children}:{children:React.ReactNode}){return <main className="cloud-gate"><section className="cloud-card"><div className="cloud-emblem"><AppLogo/></div><div className="eyebrow">TVÁ OSOBNÍ KNIHOVNA</div><h1>Liškaplikace<span className="gold">.</span></h1>{children}</section></main>}
 export default function CloudApp(){
  const [session,setSession]=useState<Session|null>(null),[loading,setLoading]=useState(true),[recovery,setRecovery]=useState(false),[error,setError]=useState("");
  useEffect(()=>{

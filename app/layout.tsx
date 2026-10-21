@@ -9,9 +9,9 @@ export const metadata: Metadata = {
   manifest:"/manifest.webmanifest",
   appleWebApp:{capable:true,title:"Liškaplikace",statusBarStyle:"black-translucent"},
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple:"/apple-touch-icon.png",
+    icon: "/liskaplikace-favicon.svg",
+    shortcut: "/liskaplikace-favicon.svg",
+    apple:"/liskaplikace-apple-touch-icon.png",
   },
 };
 export const viewport:Viewport={width:"device-width",initialScale:1,viewportFit:"cover",themeColor:"#141214"};

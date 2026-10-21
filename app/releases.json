@@ -36,5 +36,13 @@
     "changes": [
       "Vlastní obálka zůstane zachovaná i při uložení jiných údajů ze starší otevřené verze aplikace."
     ]
+  },
+  {
+    "id": 5,
+    "date": "2026-10-21",
+    "title": "Nové logo Liškaplikace",
+    "changes": [
+      "Liškaplikace má nové liščí logo, které najdeš v nabídce, na přihlašovací stránce i jako ikonu aplikace."
+    ]
   }
 ]
