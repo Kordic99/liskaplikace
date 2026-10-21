@@ -28,5 +28,13 @@
       "Původní obálka z katalogu zůstává zachovaná; můžeš se k ní kdykoli vrátit.",
       "Vlastní obálky patří jen tvému účtu, zobrazí se i na druhém zařízení a jsou součástí zálohy."
     ]
+  },
+  {
+    "id": 4,
+    "date": "2026-10-21",
+    "title": "Obálky při používání více zařízení",
+    "changes": [
+      "Vlastní obálka zůstane zachovaná i při uložení jiných údajů ze starší otevřené verze aplikace."
+    ]
   }
 ]

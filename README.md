@@ -17,6 +17,8 @@ PROD vyžaduje jednorázové použití `supabase/book-covers.sql` (v projektu Li
 
 Kontroly navíc: `npm run test:covers`. SQL test `tests/cover-storage-rls.sql` ověřuje oddělení dvou dočasných účtů v transakci zakončené ROLLBACK.
 
+Pro již existující databázi patří k této úpravě také `supabase/cover-compatibility.sql` (již provedeno). Aktualizuje kontrolu revizí: starší otevřený klient, který nové pole `customCover` nezná, je při změně jiných údajů neodstraní. Výslovné prázdné pole z nové aplikace stále umožňuje vrácení původní obálky. Nová instalace má stejnou ochranu přímo v `supabase/schema.sql`.
+
 Osobní čtenářská knihovna pro počítač i iPhone. Přehled knih, TBR, zápisky, citáty, postavy, hodnocení a nákupní list se čtyřmi motivy nastavitelnými pro každý účet. Samolepka je nahoře u uvítání, mobil má spodní navigaci a podporu přidání na plochu.
 
 ## Online verze
