@@ -33,4 +33,15 @@
  .page-intro.home-intro{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:14px;min-height:130px;align-items:center}.home-intro .welcome-sticker{width:120px}.home-intro .welcome-sticker img{width:116px}.home-intro h1{font-size:31px;line-height:1.12;margin-top:9px}.home-intro p{font-size:10px;line-height:1.65}.home-intro .eyebrow{font-size:6.5px;letter-spacing:1.15px;gap:6px;line-height:1.7}
 }
 @media(max-width:500px){.topbar{padding-left:max(17px,env(safe-area-inset-left,0px));padding-right:max(17px,env(safe-area-inset-right,0px))}.library-status{padding-left:17px;padding-right:17px}.page-intro.home-intro{grid-template-columns:minmax(0,1fr) 110px;gap:11px;min-height:135px;margin-bottom:21px}.home-intro .welcome-sticker{width:110px}.home-intro .welcome-sticker img{width:107px}.home-intro h1{font-size:30px;letter-spacing:-.5px}.home-intro p{font-size:9px;line-height:1.7}.home-intro .eyebrow{font-size:6px;letter-spacing:1px}.stars{margin-top:10px}.detail-tabs button{min-height:48px}.shopping-item-actions>.button{min-height:44px}.shopping-item-actions>.icon-button{min-width:44px;min-height:44px}}
+.stars.rating{column-gap:16px;row-gap:8px}
+.rating-icons{display:flex;align-items:center;gap:0}
+.rating-star-button{display:grid;place-items:center;width:44px;height:44px;padding:0;border-radius:4px;background:transparent;color:var(--gold)}
+.rating-star-button:hover:not(:disabled){color:var(--text)}
+.rating-glyph{display:inline-block;position:relative;vertical-align:middle}
+.rating-glyph-outline{display:block;color:var(--gold)}
+.rating-glyph-fill{position:absolute;inset:0 auto 0 0;overflow:hidden;pointer-events:none}
+.rating-glyph-fill>svg{display:block;max-width:none}
+.rating-select{display:flex;flex-direction:column;gap:3px;color:var(--muted);font-size:10px}
+.rating-select select{min-height:44px;min-width:160px;padding:8px 28px 8px 12px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--text)}
+.stars.rating>.rating-value{flex-basis:auto;margin-left:9px}
 @media(max-width:350px){.page-intro.home-intro{grid-template-columns:minmax(0,1fr) 90px;gap:8px}.home-intro .welcome-sticker{width:90px}.home-intro .welcome-sticker img{width:88px}.home-intro h1{font-size:28px}.topbar .button.compact{font-size:9px;padding:8px}.library-status{font-size:8px}.mobile-tabs>button{font-size:8px}}
