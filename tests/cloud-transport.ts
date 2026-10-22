@@ -93,11 +93,13 @@ async function main(){
  const markup=renderToStaticMarkup(createElement(StarRating,{value:3.5,onChange:()=>{}}));
  assert.equal((markup.match(/width:50%/g)??[]).length,1);
  assert.equal((markup.match(/width:100%/g)??[]).length,3);
- assert.match(markup,/<option value="3.5" selected="">3,5 \/ 5<\/option>/);
+ assert.match(markup,/aria-label="Hodnotit 3,5 z 5" aria-pressed="true"/);
+ assert.equal((markup.match(/aria-label="Hodnotit /g)??[]).length,10);
+ assert.equal(markup.includes('<select'),false);
  const locked=renderToStaticMarkup(createElement(StarRating,{value:4.5,disabled:true,onChange:()=>{}}));
- assert.equal((locked.match(/disabled=""/g)??[]).length,6);
+ assert.equal((locked.match(/disabled=""/g)??[]).length,10);
  assert.match(renderToStaticMarkup(createElement(StarRating,{value:4.25})),/4,25 \/ 5/);
- console.log('PASS half-star rendering, precise accessible selection, fractional storage and backup restore; busy controls and legacy ratings remain supported');
+ console.log('PASS split half-star click targets without a dropdown, fractional storage and backup restore; busy controls and legacy ratings remain supported');
  (globalThis as any).window={location:{href:'https://example.github.io/liskaplikace/?view=tbr',protocol:'https:'}};
  enableStaticRouting('/liskaplikace/');
  assert.equal(appHref('/kniha/'+created.id),'https://example.github.io/liskaplikace/?book='+created.id);
