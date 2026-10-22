@@ -4,6 +4,9 @@ import {blankBook,bookSchema,type Book} from '../app/model';
 import {enableStaticRouting,appHref,assetHref,localApi} from '../app/local';
 import {statusCounts,shelfFor,shelfStatus,matchesCompletion,completionDate} from '../app/library';
 import {defaultPreferences} from '../app/preferences';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import StarRating from '../app/StarRating';
 
 async function main(){
  const books:any[]=[],preferences:any[]=[];
@@ -27,11 +30,11 @@ async function main(){
  const pc=supabaseLibrary(client('reader-a'),'reader-a'),phone=supabaseLibrary(client('reader-a'),'reader-a'),stranger=supabaseLibrary(client('reader-b'),'reader-b');
  const created=await pc('/api/books','POST',{...blankBook(),title:'Strážce příběhů'});
  const before=(await phone('/api/books','GET'))[0];assert.equal(before.id,created.id);
- const updated=await phone('/api/books','PUT',{...before,wantToBuy:true,rating:5,notes:[{id:'note',type:'note',title:'Telefon',content:'Sdílený zápisek',page:4,spoiler:false,createdAt:new Date().toISOString()}]});
+ const updated=await phone('/api/books','PUT',{...before,wantToBuy:true,rating:4.5,notes:[{id:'note',type:'note',title:'Telefon',content:'Sdílený zápisek',page:4,spoiler:false,createdAt:new Date().toISOString()}]});
  assert.equal((await pc('/api/books','GET'))[0].notes[0].content,'Sdílený zápisek');
  await assert.rejects(()=>pc('/api/books','PUT',{...before,rating:1}),{status:409});
  await assert.rejects(()=>pc(`/api/books?id=${before.id}&revision=${before.revision}`,'DELETE'),{status:409});
- assert.equal((await pc('/api/books','GET'))[0].rating,5);
+ assert.equal((await pc('/api/books','GET'))[0].rating,4.5);
  assert.deepEqual(await stranger('/api/books','GET'),[]);
  const backup={format:'draci-archiv-v1',books:[{...before,id:created.id},{...blankBook(),id:crypto.randomUUID(),title:'Kniha ze zálohy'}]};
  assert.deepEqual(await pc('/api/import','POST',backup),{added:1,skipped:1});
@@ -81,6 +84,22 @@ async function main(){
  memory.set('draci-archiv-local-v1',JSON.stringify([{...fixtures[6],status:'paused'}]));
  assert.equal((await localApi('/api/books','GET'))[0].status,'tbr');
  assert.equal((await localApi('/api/preferences','GET')).themeId,'forest');
+ const halfBook=await localApi('/api/books','POST',{...blankBook(),title:'Hodnocení po půl hvězdičce',rating:0.5});
+ await localApi('/api/books','PUT',{...halfBook,rating:3.5});
+ assert.equal((await localApi('/api/books','GET')).find((book:Book)=>book.id===halfBook.id).rating,3.5);
+ const restoredId=crypto.randomUUID();
+ await localApi('/api/import','POST',{format:'draci-archiv-v1',books:[{...blankBook(),id:restoredId,title:'Půlhvězdička ze zálohy',rating:4.5}]});
+ assert.equal((await localApi('/api/books','GET')).find((book:Book)=>book.id===restoredId).rating,4.5);
+ const markup=renderToStaticMarkup(createElement(StarRating,{value:3.5,onChange:()=>{}}));
+ assert.equal((markup.match(/width:50%/g)??[]).length,1);
+ assert.equal((markup.match(/width:100%/g)??[]).length,3);
+ assert.match(markup,/aria-label="Hodnotit 3,5 z 5" aria-pressed="true"/);
+ assert.equal((markup.match(/aria-label="Hodnotit /g)??[]).length,10);
+ assert.equal(markup.includes('<select'),false);
+ const locked=renderToStaticMarkup(createElement(StarRating,{value:4.5,disabled:true,onChange:()=>{}}));
+ assert.equal((locked.match(/disabled=""/g)??[]).length,10);
+ assert.match(renderToStaticMarkup(createElement(StarRating,{value:4.25})),/4,25 \/ 5/);
+ console.log('PASS split half-star click targets without a dropdown, fractional storage and backup restore; busy controls and legacy ratings remain supported');
  (globalThis as any).window={location:{href:'https://example.github.io/liskaplikace/?view=tbr',protocol:'https:'}};
  enableStaticRouting('/liskaplikace/');
  assert.equal(appHref('/kniha/'+created.id),'https://example.github.io/liskaplikace/?book='+created.id);
