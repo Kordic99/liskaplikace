@@ -44,5 +44,14 @@
     "changes": [
       "Liškaplikace má nové liščí logo, které najdeš v nabídce, na přihlašovací stránce i jako ikonu aplikace."
     ]
+  },
+  {
+    "id": 6,
+    "date": "2026-10-22",
+    "title": "Hodnocení po půl hvězdičce",
+    "changes": [
+      "Knihy můžeš hodnotit po půl hvězdičce od 0,5 do 5.",
+      "Levá polovina hvězdy vybere půl bodu, pravá celý bod. Opakovaným kliknutím na stejnou hodnotu hodnocení zrušíš."
+    ]
   }
 ]
