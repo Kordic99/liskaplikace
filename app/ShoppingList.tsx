@@ -1,14 +1,11 @@
 "use client";
-import {useCoverImage} from "./use-cover-image";
-import { useMemo, useState, useEffect } from "react";
-import { ShoppingBag, Plus, Search, Check, X, BookOpen, ArrowUpRight, Flag, ChevronDown } from "lucide-react";
+import Cover from "./BookCover";
+import { useMemo, useState } from "react";
+import { ShoppingBag, Plus, Search, Check, X, ArrowUpRight, Flag, ChevronDown } from "lucide-react";
 import { type Book, priorityLabel } from "./model";
 import { appHref } from "./local";
 
-function ShoppingCover({book}:{book:Book}){
- const src=useCoverImage(book);const [failed,setFailed]=useState(false);useEffect(()=>setFailed(false),[src]);
- return <span className="shopping-cover">{src&&!failed?<img src={src} alt={`Obálka: ${book.title}`} onError={()=>setFailed(true)} referrerPolicy="no-referrer"/>:<BookOpen size={23}/>}</span>;
-}
+function ShoppingCover({book}:{book:Book}){return <Cover book={book} className="shopping-cover"/>}
 export default function ShoppingList({books,busy,onAdd,onToggle}:{books:Book[];busy:boolean;onAdd:()=>void;onToggle:(book:Book,wanted:boolean)=>Promise<boolean>}){
  const [query,setQuery]=useState(""),[selected,setSelected]=useState(""),[sort,setSort]=useState("priority");
  const candidates=books.filter(b=>!b.wantToBuy).sort((a,b)=>a.title.localeCompare(b.title,"cs"));

@@ -6,7 +6,7 @@ import AppLogo from "./AppLogo";
 import StarRating from "./StarRating";
 import CoverPicker from "./CoverPicker";
 import {createCoverBackup} from "./cover-backup";
-import {useCoverImage} from "./use-cover-image";
+import Cover from "./BookCover";
 import BookCatalog from "./BookCatalog";
 import Modal from "./Modal";
 import ReleaseNotice,{AutomaticReleaseNotice} from "./ReleaseNotice";
@@ -23,8 +23,6 @@ import { blankBook, statuses, priorityLabel, dateCZ, type Book, type BookData, t
 type View="home"|Shelf|"notes"|"shopping"|"settings";
 const nav=[{key:"home",label:"Můj přehled",icon:BookOpen},{key:"library",label:"Přečtené",icon:Library},{key:"reading",label:"Právě čtu",icon:BookOpen},{key:"tbr",label:"TBR",icon:Bookmark},{key:"notes",label:"Zápisník",icon:Feather},{key:"shopping",label:"Nákupní list",icon:ShoppingBag},{key:"settings",label:"Nastavení",icon:SettingsIcon}] as const;
 const priorityOrder={high:0,normal:1,low:2};
-function Dragon({className=""}:{className?:string}){return <svg className={className} viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="M12 45c-7-13-1-29 13-35l-5 12 12-9-4 15 14-7-5 12c10-1 17 4 16 12-1 10-15 15-27 9 11 1 20-3 19-8-1-4-8-4-12-1-6 3-8 0-8-4 1-5 4-8 8-10l-10 4 1-9-8 8 1 10-5 1Z" fill="currentColor"/><path d="m42 33 5-9 2 9 8 3-10 3" fill="currentColor"/><circle cx="46" cy="35" r="1.3" fill="#171415"/><path d="M24 49c-9 4-16 1-18-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>}
-function Cover({book,small=false}:{book:Pick<BookData,"cover"|"title"|"author"> & {customCover?:string};small?:boolean}){const src=useCoverImage(book);const [bad,setBad]=useState(false);useEffect(()=>setBad(false),[src]);return <div className={`cover ${small?"small":""}`} style={{"--hue":String([...book.title].reduce((a,c)=>a+c.charCodeAt(0),0)%65+320)} as React.CSSProperties}>{src&&!bad?<img src={src} alt={`Obálka: ${book.title}`} loading="lazy" referrerPolicy="no-referrer" onError={()=>setBad(true)}/>:<div className="cover-fallback"><span className="cover-rule"/><Dragon/><strong>{book.title||"Tvůj další příběh"}</strong><span>{book.author}</span><span className="cover-rule"/></div>}</div>}
 function GoogleBookSource({id}:{id:string}){return <a className="catalog-attribution" href={`https://books.google.com/books?id=${encodeURIComponent(id)}`} target="_blank" rel="noopener noreferrer"><img src="https://books.google.com/googlebooks/images/poweredby.png" alt="Powered by Google" width={62} height={30}/><span>Záznam v Google Books <ArrowUpRight size={12}/></span></a>}
 
 
