@@ -20,13 +20,29 @@ export function appHref(path:string){
  return url.href;
 }
 const bookKey=()=>namespace==="draci-archiv"?"draci-archiv-local-v1":namespace+"-books";
+const shoppingKey=()=>namespace+"-shopping";
+const journalKey=()=>namespace+"-collections-pending";
 const preferencesKey=()=>namespace==="draci-archiv"?"liskaplikace-preferences-v1":namespace+"-preferences";
 function read():Book[]{
- let raw;try{raw=localStorage.getItem(bookKey())}catch{throw new Error("Prohlížeč nepovolil místní ukládání. Otevři soubor v běžném okně Edge nebo Chrome.")}
- if(!raw)return [];
- try{const data=JSON.parse(raw);if(!Array.isArray(data))throw new Error();return data.map((book:any)=>book.status==="paused"?{...book,status:"tbr"}:book)}catch{throw new Error("Místní knihovnu nelze přečíst. Existující data nebyla přepsána.")}
+ let raw,shopping,pending;try{raw=localStorage.getItem(bookKey());shopping=localStorage.getItem(shoppingKey());pending=localStorage.getItem(journalKey())}catch{throw new Error("Prohlížeč nepovolil místní ukládání. Otevři soubor v běžném okně Edge nebo Chrome.")}
+ let books:Book[],migrate=false;
+ try{
+  const library=JSON.parse(raw??"[]"),list=JSON.parse(shopping??"[]"),rows=pending?JSON.parse(pending):[...library,...list];
+  if(!Array.isArray(library)||!Array.isArray(list)||!Array.isArray(rows))throw new Error();
+  books=rows.map((book:any)=>{const parsed=bookSchema.parse(book);if(typeof book.id!=="string"||!Number.isSafeInteger(book.revision)||book.revision<0)throw new Error();const moved=!pending&&library.includes(book)&&parsed.status==="shopping";if(moved)migrate=true;return {...parsed,id:book.id,revision:book.revision+(moved?1:0)}});
+  if(new Set(books.map(book=>book.id)).size!==books.length)throw new Error();
+ }catch{throw new Error("Místní knihovnu nelze přečíst. Existující data nebyla přepsána.")}
+ if(pending||migrate)write(books);
+ return books;
 }
-function write(books:Book[]){try{localStorage.setItem(bookKey(),JSON.stringify(books))}catch{throw new Error("Knihovnu nelze uložit. Úložiště prohlížeče může být plné nebo zakázané.")}}
+function write(books:Book[]){let committed=false;try{
+ // A recoverable journal prevents a failed second write from losing a transferred book.
+ localStorage.setItem(journalKey(),JSON.stringify(books));
+ committed=true;
+ localStorage.setItem(bookKey(),JSON.stringify(books.filter(book=>book.status!=="shopping")));
+ localStorage.setItem(shoppingKey(),JSON.stringify(books.filter(book=>book.status==="shopping")));
+ localStorage.setItem(journalKey(),"");
+}catch{if(!committed)throw new Error("Knihovnu nelze uložit. Úložiště prohlížeče může být plné nebo zakázané.")}}
 export async function localApi(path:string,method:string,body?:any):Promise<any>{
  const url=new URL(path,"https://local.invalid");
  if(url.pathname==="/api/covers"){
