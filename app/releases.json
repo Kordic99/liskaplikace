@@ -53,5 +53,15 @@
       "Knihy můžeš hodnotit po půl hvězdičce od 0,5 do 5.",
       "Levá polovina hvězdy vybere půl bodu, pravá celý bod. Opakovaným kliknutím na stejnou hodnotu hodnocení zrušíš."
     ]
+  },
+  {
+    "id": 7,
+    "date": "2026-11-15",
+    "title": "Nákupní list oddělený od TBR",
+    "changes": [
+      "Knihy přidané na nákupní list se už automaticky nezařazují do TBR. Oba seznamy mají oddělené uložení.",
+      "Dosavadní nákupní položky jsme přesunuli pouze na nákupní list. Ostatní knihy v TBR zůstaly zachované.",
+      "Přesuny mezi nákupním listem a knihovnou jsou výslovné. Po označení knihy jako koupené si vybereš cílovou poličku; zápisky, hodnocení a vlastní obálka zůstanou u knihy."
+    ]
   }
 ]

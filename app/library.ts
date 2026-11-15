@@ -2,10 +2,10 @@ import type { Book } from "./model";
 
 export const shelfStatus = {library:"read",reading:"reading",tbr:"tbr"} as const;
 export type Shelf = keyof typeof shelfStatus;
-export const shelfFor = (status:Book["status"]):Shelf => status === "read" ? "library" : status;
+export const shelfFor = (status:Book["status"]):Shelf|"shopping" => status === "read" ? "library" : status;
 export function statusCounts(books:Book[]) {
  const counts={read:0,reading:0,tbr:0};
- for(const book of books)counts[book.status]++;
+ for(const book of books)if(book.status!=="shopping")counts[book.status]++;
  return counts;
 }
 // Keep the calendar date that was entered, including dates in old ISO backups.

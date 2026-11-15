@@ -46,3 +46,5 @@
 .rating-glyph-fill>svg{display:block;max-width:none}
 .stars.rating>.rating-value{flex-basis:auto;margin-left:9px}
 @media(max-width:350px){.page-intro.home-intro{grid-template-columns:minmax(0,1fr) 90px;gap:8px}.home-intro .welcome-sticker{width:90px}.home-intro .welcome-sticker img{width:88px}.home-intro h1{font-size:28px}.topbar .button.compact{font-size:9px;padding:8px}.library-status{font-size:8px}.mobile-tabs>button{font-size:8px}}
+
+.shopping-destinations{flex-wrap:wrap;justify-content:flex-start}.shopping-destinations .button{white-space:normal}
